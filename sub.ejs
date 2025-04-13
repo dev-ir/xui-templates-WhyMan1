@@ -65,7 +65,7 @@
         </div>
         <div class="user-info">
             <div class="status">
-                <div class="status-label" id="status-label"><%= data.enable ? "active" : "disabled" %></div>
+                <div class="status-label" id="status-label"><%= data.enable ? "فعال" : "غیرفعال" %></div>
             </div>
             <div class="info">
                 <div class="info-item">
@@ -80,10 +80,46 @@
                     <span class="info-label">حجم مصرف شده:</span>
                     <span id="used-traffic"><%= formatBytes((data.up + data.down)) %></span>
                 </div>
-                <!-- <div class="info-item">
+                <div class="info-item">
                     <span class="info-label">حجم باقی مانده:</span>
-                    <span id="remaining-traffic">نامحدود</span>
-                </div> -->
+
+                    <% 
+                    try {
+                        if (!data || typeof data.expiryTime === 'undefined') {
+                            throw new Error("data یا expiryTime تعریف نشده است.");
+                        }
+                        const expiryTime = parseInt(data.expiryTime, 10);
+                        if (isNaN(expiryTime)) {
+                            throw new Error("expiryTime یک عدد معتبر نیست.");
+                        }
+                        const currentTime = Date.now();                
+                        if (expiryTime === 0) {
+                            %>
+                            
+                            <span id="remaining-traffic">بدون محدودیت</span>
+                            <%
+                        } 
+                        else if (expiryTime > currentTime) {
+                            const remainingDays = Math.floor((expiryTime - currentTime) / (1000 * 60 * 60 * 24));
+                            %>
+                            <%= remainingDays %>
+                            <span id="remaining-traffic">روز</span>
+                            <%
+                        } 
+                        else {
+                            %>
+                            <span id="remaining-traffic">منقضی شده</span>
+                            <%
+                        }
+                    } catch (error) {
+                        alert("خطا در محاسبه روزهای باقیمانده:", error.message);
+                        %>
+                        <span id="remaining-traffic">نامشخص</span>
+                        <%
+                    }
+                    %>
+
+                </div>
             </div>
             <div class="expiration-info" id="expiration-info"></div>
         </div>
